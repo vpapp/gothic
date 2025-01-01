@@ -1,7 +1,10 @@
 package main
 
-import tk "github.com/nsf/gothic"
-import "fmt"
+import (
+	"fmt"
+
+	tk "github.com/vpapp/gothic"
+)
 
 func main() {
 	ir := tk.NewInterpreter(`

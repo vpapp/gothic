@@ -1,9 +1,12 @@
 package main
 
-import "github.com/nsf/gothic"
-import "image/png"
-import "image"
-import "os"
+import (
+	"image"
+	"image/png"
+	"os"
+
+	"github.com/vpapp/gothic"
+)
 
 func loadPNG(filename string) image.Image {
 	f, err := os.Open(filename)

@@ -1,0 +1,10 @@
+prefix=${pcfiledir}
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${exec_prefix}/lib
+
+Name: libtclkit
+Description: Tcl/Tk kit
+Version: 1.0.0
+Cflags: -I${includedir}
+Libs: -L${libdir} -ltclkit860

@@ -1,7 +1,10 @@
 package main
 
-import "github.com/nsf/gothic"
-import "time"
+import (
+	"time"
+
+	"github.com/vpapp/gothic"
+)
 
 func main() {
 	ir := gothic.NewInterpreter(`
@@ -17,7 +20,7 @@ func main() {
 				inc = -inc
 			}
 			i += inc
-			time.Sleep(5e7)
+			time.Sleep(50 * time.Millisecond)
 			ir.Eval(`.bar1 configure -value %{}`, i)
 		}
 	}()
@@ -31,7 +34,7 @@ func main() {
 				inc = -inc
 			}
 			i += inc
-			time.Sleep(1e8)
+			time.Sleep(100 * time.Millisecond)
 			ir.Eval(`.bar2 configure -value %{}`, i)
 		}
 	}()

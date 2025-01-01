@@ -1,11 +1,9 @@
 package gothic
 
 /*
-#cgo !tcl85 LDFLAGS: -ltcl8.6 -ltk8.6
-#cgo !tcl85 CFLAGS: -I/usr/include/tcl8.6
-#cgo tcl85 LDFLAGS: -ltcl8.5 -ltk8.5
-#cgo tcl85 CFLAGS: -I/usr/include/tcl8.5
-#cgo darwin tcl85 CFLAGS: -I/opt/X11/include
+// set PKG_CONFIG_PATH=/path/to/libtclkit-sdk-8.6.x
+
+#cgo pkg-config: libtclkit
 
 #include "interpreter.h"
 */
@@ -15,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"os"
 	"reflect"
 	"runtime"
 	"strings"
@@ -92,17 +91,18 @@ func NewInterpreter(init interface{}) *Interpreter {
 // errors go through ErrorFilter, just like any other tcl error.
 //
 // The syntax for formatting tags is:
-//  %{[<abbrev>[<format>]]}
+//
+//	%{[<abbrev>[<format>]]}
 //
 // Where:
 //
-//  <abbrev> could be a number of the function argument (starting from 0) or a
-//           name of the key in the provided gothic.ArgMap argument. It can
-//           also be empty, in this case it uses internal counter, takes the
-//           corresponding argument and increments that counter.
+//	<abbrev> could be a number of the function argument (starting from 0) or a
+//	         name of the key in the provided gothic.ArgMap argument. It can
+//	         also be empty, in this case it uses internal counter, takes the
+//	         corresponding argument and increments that counter.
 //
-//  <format> Is the fmt.Sprintf format specifier, passed directly to
-//           fmt.Sprintf as is (except for %q, see additional notes).
+//	<format> Is the fmt.Sprintf format specifier, passed directly to
+//	         fmt.Sprintf as is (except for %q, see additional notes).
 //
 // Additional notes:
 //
@@ -118,8 +118,8 @@ func NewInterpreter(init interface{}) *Interpreter {
 //  3. gothic.Eval("%{0%.2f} and %{%.2f}", 3.1415)
 //     "3.14 and 3.14"
 //  4. gothic.Eval("[myfunction %{arg1} %{arg2}]", gothic.ArgMap{
-//             "arg1": 5,
-//             "arg2": 10,
+//     "arg1": 5,
+//     "arg2": 10,
 //     })
 //     "[myfunction 5 10]"
 //  5. gothic.Eval("%{%q}", "[command $variable]")
@@ -314,7 +314,7 @@ func (g *global_handles_t) get_handle_for_value(value interface{}) int {
 
 func (g *global_handles_t) free_handle(id int) {
 	g.Lock()
-	g.free_handle(id)
+	g.handles.free_handle(id)
 	g.Unlock()
 }
 
@@ -362,6 +362,8 @@ func release_interpreter(ir *interpreter) {
 }
 
 func new_interpreter() (*interpreter, error) {
+	C.Tcl_FindExecutable(C.CString(os.Args[0]))
+
 	ir := &interpreter{
 		C:              C.Tcl_CreateInterp(),
 		errfilt:        func(err error) error { return err },
@@ -441,8 +443,7 @@ func go_value_to_tcl_obj(value interface{}) *C.Tcl_Obj {
 		return C.Tcl_NewBooleanObj(0)
 	case reflect.String:
 		s := v.String()
-		sh := *(*reflect.StringHeader)(unsafe.Pointer(&s))
-		return C.Tcl_NewStringObj((*C.char)(unsafe.Pointer(sh.Data)), C.int(len(s)))
+		return C.Tcl_NewStringObj((*C.char)(unsafe.Pointer(unsafe.StringData(s))), C.int(len(s)))
 	}
 	return nil
 }

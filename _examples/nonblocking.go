@@ -1,7 +1,10 @@
 package main
 
-import "github.com/nsf/gothic"
-import "time"
+import (
+	"time"
+
+	"github.com/vpapp/gothic"
+)
 
 func proc(ir *gothic.Interpreter, num string) {
 	button := ".b" + num
@@ -10,7 +13,7 @@ func proc(ir *gothic.Interpreter, num string) {
 	recv := make(chan int)
 
 	// register channel and enable button
-	ir.RegisterCommand(channame, func(_ string, arg int){
+	ir.RegisterCommand(channame, func(_ string, arg int) {
 		recv <- arg
 	})
 	ir.Eval(`%{} configure -state normal`, button)
@@ -23,7 +26,7 @@ func proc(ir *gothic.Interpreter, num string) {
 		ir.Eval(`%{} configure -state disabled -text "In Progress %{}"`, button, num)
 		for i := 0; i <= 100; i += 2 {
 			ir.Eval(`%{%s} configure -value %{}`, progress, i)
-			time.Sleep(5e7)
+			time.Sleep(50 * time.Millisecond)
 		}
 
 		// reset button state and progress value
